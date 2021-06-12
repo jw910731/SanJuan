@@ -1,3 +1,0 @@
-[submodule "linenoise"]
-	path = linenoise
-	url = git@github.com:jw910731/linenoise.git
