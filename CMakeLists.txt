@@ -1,4 +1,4 @@
-project(SanJuan-Root)
+project(SanJuan)
 cmake_minimum_required(VERSION 3.17)
 
 add_subdirectory(src)
