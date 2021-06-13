@@ -3,8 +3,16 @@
 //
 #include <stdio.h>
 
+#include <readline/history.h>
+
+#include "shell.h"
+
 int main(){
-    printf("Hello San Juan!");
+    // initialize GNU readline
+    using_history();
+
+    // shell main loop entry point
+    sanjuan_shell_boostrap();
     return 0;
 }
 
