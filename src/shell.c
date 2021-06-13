@@ -3,6 +3,8 @@
 //
 
 #include "shell.h"
+#include "game.h"
+#include "game_sp/game_sp.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -48,19 +50,25 @@ static int32_t command_parser(char *s){
             printf("%s", help_msg);
             break;
         case 2: {
+            it = strtok_r(NULL, " ", &saveptr);
             if(strcmp(it, "help") == 0){
                 static const char *game_help =  "game command help\n"
                                                 "    game start: start a single player game.\n"
                                                 "    game connect: connect to a remote server to start game. (not implemented)\n";
                 printf("%s", game_help);
+                break;
             }
             if(strcmp(it, "start") == 0){
-                // TODO: setup single player game
+                sanjuan_game_init = sanjuan_gamesp_init;
             }
             if(strcmp(it, "connect") == 0){
                 printf("Current not implemented.\n");
             }
-            break;
+
+            if(sanjuan_game_init(&saveptr)){
+                return 1;
+            }
+            return 3;
         }
         case 3:
             return 2;
@@ -87,8 +95,13 @@ void sanjuan_shell_boostrap(){
         if(stat <= 0){ // error
             printf("Unknown command. Get help message by typing \"help\". \n");
         }
-        if(stat > 1){ // exit
+        if(stat == 2){ // exit
             loop_flag = false;
+        }
+
+        if(stat == 3){ // successfully boostrap game
+            sanjuan_game_start();
+            sanjuan_game_free();
         }
 
         // save history
