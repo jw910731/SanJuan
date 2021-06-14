@@ -1,1 +1,1 @@
-add_library(SanJuan_Util OBJECT util.h)
+add_library(SanJuan_Util OBJECT util.h util.c)
