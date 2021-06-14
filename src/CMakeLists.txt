@@ -7,6 +7,7 @@ set(SOURCE_FILES
         shell.h
         game.h
         game.c
+        client.h
         $<TARGET_OBJECTS:SanJuan_gameSP>
         $<TARGET_OBJECTS:SanJuan_Util>
 )

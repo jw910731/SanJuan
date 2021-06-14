@@ -17,7 +17,7 @@ int sanjuan_gamesp_init(char **saveptr){
     if(strcmp(it, "help") == 0){
         static char *help = "game start help\n"
                             "Usage: game start [AI Type...]\n"
-                            "Use at least 1 AI at most 4 AIs to play with you!\n"
+                            "Use at least 1 AI at most 3 AIs to play with you!\n"
                             "Available AI Type:\n"
                             "    Random: AI that do random available action.\n";
         printf("%s", help);
@@ -25,14 +25,16 @@ int sanjuan_gamesp_init(char **saveptr){
     }
     else{
         ++fake_count;
-        for(it = strtok_r(NULL, " ", saveptr) ; it != NULL && fake_count <= 4; it = strtok_r(NULL, " ", saveptr)){
-            if(fake_count >= 4) {
+        for(it = strtok_r(NULL, " ", saveptr) ; it != NULL && fake_count <= 3; it = strtok_r(NULL, " ", saveptr)){
+            if(fake_count >= 3) {
                 printf("Too much AI player!\n");
                 return 1;
             }
             ++fake_count;
         }
     }
+    // setup AIs
+    sanjuan_game_client_count = fake_count + 1; // add player
 
     // setup runtime link
     sanjuan_game_free = sanjuan_gamesp_free;
