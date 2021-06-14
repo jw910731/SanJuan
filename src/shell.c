@@ -23,12 +23,14 @@ static const char *help_msg = "SanJuan Shell help message\n"
                         "To get detail help message of command. Use <command> -h\n";
 
 static bool empty_string(const char *s){
+    bool flag = true;
     for(const char *it = s ; *it ; ++it){
+        flag = false;
         if(!isspace(*it)){
             return false;
         }
     }
-    return true;
+    return flag;
 }
 
 static int32_t command_parser(char *s){
@@ -90,22 +92,21 @@ void sanjuan_shell_boostrap(){
         line = readline("SanJuan sh>");
         if(!line) break;
 
-        // parse command
-        int32_t stat = command_parser(line);
-        if(stat <= 0){ // error
-            printf("Unknown command. Get help message by typing \"help\". \n");
-        }
-        if(stat == 2){ // exit
-            loop_flag = false;
-        }
+        if(!empty_string(line)){
+            // parse command
+            int32_t stat = command_parser(line);
+            if(stat <= 0){ // error
+                printf("Unknown command. Get help message by typing \"help\". \n");
+            }
+            if(stat == 2){ // exit
+                loop_flag = false;
+            }
+            if(stat == 3){ // successfully boostrap game
+                sanjuan_game_start();
+                sanjuan_game_free();
+            }
 
-        if(stat == 3){ // successfully boostrap game
-            sanjuan_game_start();
-            sanjuan_game_free();
-        }
-
-        // save history
-        if(empty_string(line)){
+            // save history
             add_history(line);
         }
 
