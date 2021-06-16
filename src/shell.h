@@ -5,7 +5,7 @@
 #ifndef SANJUAN_ROOT_SHELL_H
 #define SANJUAN_ROOT_SHELL_H
 
-/*
+/**
  * Entry point of the program
  * Used to setup and boostrap game component
  */

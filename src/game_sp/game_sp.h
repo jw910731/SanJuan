@@ -7,23 +7,16 @@
 
 #include "../game.h"
 
-/*
- * Card not in card supply
+/** @struct
+ * Card that is in hand, table or chapel
  */
 struct deck_card{
-    /*
-     * Represent card type
-     */
-    enum sanjuan_card card;
-
-    /*
-     * Card type independent storage space
-     */
-    int32_t storage;
+    enum sanjuan_card card;///< Represent card type
+    int32_t storage; ///<  Card type independent storage space
 };
 
-/*
- * Player util struct
+/** @struct
+ * Stores player state
  */
 struct player{
     struct deck_card hand[SANJUAN_MAX_CARD];
@@ -31,14 +24,15 @@ struct player{
     struct deck_card chapel[SANJUAN_MAX_CARD];
 };
 
-/*
+/**
  * Perform runtime linking to link gameSP to game component
  */
 void sanjuan_gamesp_runtime_link();
 
-/*
+/**
  * Parse arg from CLI
  * Used to fill in information to gameSP
+ * @param saveptr the <code>saveptr</code> of <code>strtok_r</code> for continuous call of <code>strtok_r</code>
  */
 int32_t sanjuan_gamesp_arg_parse(char **);
 

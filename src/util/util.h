@@ -10,16 +10,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-/*
+/**
  * random that uses /dev/urandom as seed if available
  * otherwise fallback to use time(NULL) as seed
  */
 int32_t sanjuan_urandom();
 
-/*
+/**
  * shuffle given array
- * @param nmemb is array element count
- * @param size is each element size
+ * @param base pointer points to start of array
+ * @param nmemb array element count
+ * @param size each element size
  */
 void sanjuan_shuffle(void *base, size_t nmemb, size_t size);
 

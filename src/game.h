@@ -10,15 +10,11 @@
 
 #define SANJUAN_MAX_CARD 110
 
-/*
- * Card enum for card type representation
- * less than 0 => error stat
+/** @enum
+ * Represent card type
  */
 enum sanjuan_card{
-    /*
-     * Invalid state is for null termination or placeholder
-     */
-    CARD_INVALID = -1,
+    CARD_INVALID = -1, ///< Invalid state is for null termination or placeholder
 
     CARD_SMITHY = 0,
     CARD_INDIGO_PLANT = 1,
@@ -51,42 +47,33 @@ enum sanjuan_card{
     CARD_LIBRARY = 28,
 };
 
-/*
- * Card occurrence
- */
 static const int32_t init_card_count[] = {
     3, 10, 8, 8, 8, 8, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3, 2, 2, 3, 3, 3, 3, 3
-};
+}; ///< Card occurrence
 
-/*
- * Card VP
+/** @breif Card VP
+ *
  * 0 means VP is not static
  */
 static const int32_t card_vp[] = {
     1, 1, 1, 2, 2, 3, 0, 1, 2, 2, 1, 1, 1, 2, 1, 2, 0, 1, 1, 5, 3, 4, 0, 0, 1, 2, 2, 2, 3
 };
 
-/*
- * Card Cost
- */
 static const int32_t card_cost[]={
     1, 1, 2, 3, 4, 5, 6, 2, 3, 4, 2, 2, 2, 3, 1, 3, 6, 2, 1, 5, 3, 4, 6, 6, 2, 3, 4, 3, 5
-};
+}; ///< Card Cost
 
-/*
- * Is card city card or production card
- */
 static const bool card_isPurple[] = {
     true, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true
-};
+}; ///< Is card city card or production card
 
 static const char *sanjuan_rolename[] = {"Builder", "Councillor", "Producer", "Prospector", "Trader"};
 
+/** @enum
+ * Represent role in San Juan
+ */
 enum sanjuan_role{
-    /*
-     * Invalid role shall be used when user isn't done with role selecting
-     */
-    ROLE_INVALID = -1,
+    ROLE_INVALID = -1, ///< Invalid role shall be used when user isn't done with role selecting
 
     ROLE_BUILDER = 0,
     ROLE_COUNCILLOR,
@@ -95,44 +82,42 @@ enum sanjuan_role{
     ROLE_TRADER,
 };
 
-/*
- * Client interface struct
- * Note that do not block on input stream for all of the function in client_meta
- * you should let the caller block the input stream
+/** @interface Client interface
+ * Abstract layer for game component to interact with player or AI
+ * @note Do not block on input stream for all of the function in <code>client_meta</code>.
+ * The caller should block for you.
  */
 struct sanjuan_client_meta{
-    /*
-     * ID of this client
-     */
     // TODO: Design get id from game component
-    int32_t id;
+    int32_t id; ///< ID of this client
 
-    /*
+    /**
      * Block fd
      * File descriptor that may block the client
      * caller will use select syscall to prevent blocking
      */
     int fd;
 
-    /*
+    /**
      * @return for error reporting
      */
     int32_t (*init)();
 
-    /*
+    /**
      * Choose Role
      * this function should avoid returning invalid role such as selected role
      * @return chosen role or ROLE_INVALID if client is not done with selecting role
      */
     enum sanjuan_role (*choose_role)();
 
-    /*
+    /**
      * Idle for other blocking operation
      * caller should also check if input stream is available to access or not
+     * @return preserve for future, currently ignored
      */
     int32_t (*idle)();
 
-    /*
+    /**
      * Perform Builder
      * @return selected card to build or CARD_INVALID if client is not ready
      */
@@ -145,30 +130,32 @@ struct sanjuan_client_meta{
  */
 
 // Game phase control
-extern void (*sanjuan_game_init)(void);
-extern void (*sanjuan_game_free)(void);
-extern void (*sanjuan_game_start)(void);
+extern void (*sanjuan_game_init)(void);    ///< Init game component
+extern void (*sanjuan_game_free)(void);    ///< Free game related resource
+extern void (*sanjuan_game_start)(void);   ///< Start game
+
 
 // Game fetch API for client
 
-/*
+/**
  * Draw card from card supply
  */
 extern enum sanjuan_card (*sanjuan_game_draw)();
 
-/*
+/**
  * Discard card
+ * @param card put this card to discard stack
  */
 extern void (*sanjuan_game_discard)(enum sanjuan_card);
 
-/*
+/**
  * Get player count in this game
  */
 extern int32_t (*sanjuan_game_player_count)();
 
-/*
+/**
  * Query which role is not chosen
- * @return bitmask for which role is currently available, or return 0 for not choosing role
+ * @return bitmask for which role is currently available, undefined if not in choosing role state
  */
 extern int8_t (*sanjuan_game_get_available_role)();
 #endif //SANJUAN_ROOT_GAME_H
