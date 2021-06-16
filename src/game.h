@@ -83,6 +83,11 @@ static const bool card_isPurple[] = {
 static const char *sanjuan_rolename[] = {"Builder", "Councillor", "Producer", "Prospector", "Trader"};
 
 enum sanjuan_role{
+    /*
+     * Invalid role shall be used when user isn't done with role selecting
+     */
+    ROLE_INVALID = -1,
+
     ROLE_BUILDER = 0,
     ROLE_COUNCILLOR,
     ROLE_PRODUCER,
@@ -92,6 +97,8 @@ enum sanjuan_role{
 
 /*
  * Client interface struct
+ * Note that do not block on input stream for all of the function in client_meta
+ * you should let the caller block the input stream
  */
 struct sanjuan_client_meta{
     /*
@@ -101,23 +108,33 @@ struct sanjuan_client_meta{
     int32_t id;
 
     /*
+     * Block fd
+     * File descriptor that may block the client
+     * caller will use select syscall to prevent blocking
+     */
+    int fd;
+
+    /*
      * @return for error reporting
      */
-    int (*init)();
+    int32_t (*init)();
 
     /*
      * Choose Role
-     * @return chosen role
+     * this function should avoid returning invalid role such as selected role
+     * @return chosen role or ROLE_INVALID if client is not done with selecting role
      */
     enum sanjuan_role (*choose_role)();
 
     /*
      * Idle for other blocking operation
+     * caller should also check if input stream is available to access or not
      */
-    void (*idle)();
+    int32_t (*idle)();
 
     /*
      * Perform Builder
+     * @return selected card to build or CARD_INVALID if client is not ready
      */
     enum sanjuan_card (*doBuilder)();
 };
@@ -149,4 +166,9 @@ extern void (*sanjuan_game_discard)(enum sanjuan_card);
  */
 extern int32_t (*sanjuan_game_player_count)();
 
+/*
+ * Query which role is not chosen
+ * @return bitmask for which role is currently available, or return 0 for not choosing role
+ */
+extern int8_t (*sanjuan_game_get_available_role)();
 #endif //SANJUAN_ROOT_GAME_H
