@@ -33,6 +33,7 @@ void sanjuan_gamesp_runtime_link();
  * Parse arg from CLI
  * Used to fill in information to gameSP
  * @param saveptr the <code>saveptr</code> of <code>strtok_r</code> for continuous call of <code>strtok_r</code>
+ * @return 1 for fail, 0 for successfully setup game
  */
 int32_t sanjuan_gamesp_arg_parse(char **);
 

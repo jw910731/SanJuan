@@ -33,6 +33,7 @@ static bool empty_string(const char *s){
     return flag;
 }
 
+// Forbidden to input empty string, should be filtered out before calling
 static int32_t command_parser(char *s){
     char *saveptr;
     char *it = strtok_r(s, " ", &saveptr);
