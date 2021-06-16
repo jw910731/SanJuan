@@ -61,23 +61,23 @@ static int32_t command_parser(char *s){
                 break;
             }
             if(strcmp(it, "start") == 0){
-                sanjuan_game_init = sanjuan_gamesp_init;
+                // parse arg and setup runtime link
+                if(sanjuan_gamesp_arg_parse(&saveptr)){
+                    sanjuan_gamesp_runtime_link();
+                    return 3; // game ready to boostrap
+                }
             }
             if(strcmp(it, "connect") == 0){
-                printf("Current not implemented.\n");
+                printf("Currently not implemented.\n");
             }
-
-            if(sanjuan_game_init(&saveptr)){
-                return 1;
-            }
-            return 3;
+            return 1; // continue to listen cmd
         }
         case 3:
             return 2;
         default:
-            return 0;
+            return 0; // error
     }
-    return 1;
+    return 1; // continue to listen cmd
 }
 
 void sanjuan_shell_boostrap(){
@@ -102,6 +102,7 @@ void sanjuan_shell_boostrap(){
                 loop_flag = false;
             }
             if(stat == 3){ // successfully boostrap game
+                sanjuan_game_init();
                 sanjuan_game_start();
                 sanjuan_game_free();
             }
