@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 /**
- * random that uses /dev/urandom as seed if available
+ * random that uses <code>/dev/urandom</code> as seed if available
  * otherwise fallback to use time(NULL) as seed
  */
 int32_t sanjuan_urandom();

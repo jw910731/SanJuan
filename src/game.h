@@ -82,7 +82,7 @@ enum sanjuan_role{
     ROLE_TRADER,
 };
 
-/** @interface Client interface
+/**
  * Abstract layer for game component to interact with player or AI
  * @note Do not block on input stream for all of the function in <code>client_meta</code>.
  * The caller should block for you.

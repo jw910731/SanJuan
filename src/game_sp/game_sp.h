@@ -7,7 +7,7 @@
 
 #include "../game.h"
 
-/** @struct
+/**
  * Card that is in hand, table or chapel
  */
 struct deck_card{
@@ -15,7 +15,7 @@ struct deck_card{
     int32_t storage; ///<  Card type independent storage space
 };
 
-/** @struct
+/**
  * Stores player state
  */
 struct player{
