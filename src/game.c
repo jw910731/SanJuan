@@ -13,4 +13,3 @@ void (*sanjuan_game_start)(void);
 enum sanjuan_card (*sanjuan_game_draw)();
 void (*sanjuan_game_discard)(enum sanjuan_card);
 int32_t (*sanjuan_game_player_count)();
-int8_t (*sanjuan_game_get_available_role)();

@@ -36,12 +36,6 @@ static int32_t discard_count;
 static enum sanjuan_card discard[SANJUAN_MAX_CARD];
 
 /*
- * Global state for query
- */
-// Currently available role
-int8_t ava_role;
-
-/*
  * Runtime linking function
  */
 static void game_init();
@@ -50,7 +44,6 @@ static void game_start();
 static int32_t player_count_getter();
 static enum sanjuan_card draw();
 static void discard_card(enum sanjuan_card);
-static int8_t available_role();
 
 void sanjuan_gamesp_runtime_link(){
     sanjuan_game_init = game_init;
@@ -59,7 +52,6 @@ void sanjuan_gamesp_runtime_link(){
     sanjuan_game_draw = draw;
     sanjuan_game_discard = discard_card;
     sanjuan_game_player_count = player_count_getter;
-    sanjuan_game_get_available_role = available_role;
 }
 
 /*
@@ -119,13 +111,13 @@ static void game_free(){
 static void game_start(){
     while(1){
         for(int32_t gov_cnt = 0 ; gov_cnt < player_count ; ++gov_cnt){ // governor take turn
-            ava_role = 0x1f;
+            int8_t ava_role = 0x1f;
             for(int32_t round_counter = 0 ; round_counter < ((player_count > 2)?player_count:3) ; ++round_counter){ // inside round
                 // the role selecting player id
                 int32_t selector = (gov_cnt + round_counter) % player_count;
-                enum sanjuan_role role = client_metas[selector].choose_role();
+                enum sanjuan_role role = client_metas[selector].choose_role(ava_role);
                 // mark selected role
-                ava_role |= (int8_t)(1<<role);
+                ava_role = (int8_t)(ava_role & ((int8_t)(~(1<<role))));
                 // take turn to perform role
                 for(int cnt = 0, i = selector; cnt < player_count ; i = (i+1) % player_count, ++cnt){
                     // TODO: perform role
@@ -160,8 +152,4 @@ static void discard_card(enum sanjuan_card card){
 
 static void card_shuffle(enum sanjuan_card *cards, size_t n){
     sanjuan_shuffle(cards, n, sizeof(enum sanjuan_card));
-}
-
-static int8_t available_role(){
-    return ava_role;
 }

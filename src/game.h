@@ -107,8 +107,9 @@ struct sanjuan_client_meta{
      * Choose Role
      * this function should avoid returning invalid role such as selected role
      * @return chosen role or ROLE_INVALID if client is not done with selecting role
+     * @param bitset represent currently available role
      */
-    enum sanjuan_role (*choose_role)();
+    enum sanjuan_role (*choose_role)(const int8_t);
 
     /**
      * Idle for other blocking operation
@@ -152,10 +153,4 @@ extern void (*sanjuan_game_discard)(enum sanjuan_card);
  * Get player count in this game
  */
 extern int32_t (*sanjuan_game_player_count)();
-
-/**
- * Query which role is not chosen
- * @return bitmask for which role is currently available, undefined if not in choosing role state
- */
-extern int8_t (*sanjuan_game_get_available_role)();
 #endif //SANJUAN_ROOT_GAME_H
