@@ -104,12 +104,16 @@ struct sanjuan_client_meta{
     int32_t (*init)();
 
     /**
-     * Choose Role
-     * this function should avoid returning invalid role such as selected role
-     * @return chosen role or ROLE_INVALID if client is not done with selecting role
-     * @param bitset represent currently available role
+     * Choose role hook for client to perform hint text or prepare prompt.
+     * @param bitset represent what role is currently available
      */
-    enum sanjuan_role (*choose_role)(const int8_t);
+    void (*pre_choose_role)(const int8_t);
+    /**
+     * Actual choose role function
+     * this function should avoid returning invalid role such as selected role
+     * @return chosen role or ROLE_INVALID if client is not done with selecting role. When success, it self cleanup used resource.
+     */
+    enum sanjuan_role (*choose_role)();
 
     /**
      * Idle for other blocking operation
@@ -119,10 +123,15 @@ struct sanjuan_client_meta{
     int32_t (*idle)();
 
     /**
-     * Perform Builder
-     * @return selected card to build or CARD_INVALID if client is not ready
+     * Perform role hook for client to setup and notify which role to perform
+     * @param sanjuan_role represent which role to perform
      */
-    enum sanjuan_card (*doBuilder)();
+    void (*pre_perform_role)(enum sanjuan_role);
+    /**
+     * Actual non-blocking perform role function
+     * @return 1 for success and 0 for fail and wait. When success, it self cleanup used resource.
+     */
+    int32_t (*perform_role)();
 };
 
 /*
