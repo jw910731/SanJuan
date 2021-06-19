@@ -1,1 +1,1 @@
-add_library(SanJuan_gameSP OBJECT game_sp.h game_sp.c)
+add_library(SanJuan_gameSP OBJECT game_sp.h game_sp.c dummy.c dummy.h)

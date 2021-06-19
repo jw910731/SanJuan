@@ -8,20 +8,12 @@
 #include "../game.h"
 
 /**
- * Card that is in hand, table or chapel
- */
-struct deck_card{
-    enum sanjuan_card card;///< Represent card type
-    int32_t storage; ///<  Card type independent storage space
-};
-
-/**
  * Stores player state
  */
 struct player{
-    struct deck_card hand[SANJUAN_MAX_CARD];
-    struct deck_card table[SANJUAN_MAX_CARD];
-    struct deck_card chapel[SANJUAN_MAX_CARD];
+    enum sanjuan_card hand[SANJUAN_MAX_CARD]; // NULL Terminate
+    struct sanjuan_table_card table[12];
+    enum sanjuan_card chapel[SANJUAN_MAX_CARD]; // NULL Terminate
 };
 
 /**
