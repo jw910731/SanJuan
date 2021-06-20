@@ -1,4 +1,4 @@
-# SanJuan [![CodeFactor](https://www.codefactor.io/Content/badges/APlus.svg)](https://www.codefactor.io/repository/github/jw910731/sanjuan/overview/main)
+# SanJuan [![CodeFactor](https://www.codefactor.io/repository/github/jw910731/sanjuan/badge/main)](https://www.codefactor.io/repository/github/jw910731/sanjuan/overview/main)
 My Computer Programming class final project. The tabletop game San Juan.
 
 # Build & Install
