@@ -20,10 +20,12 @@ static int8_t ava_role; // (globale state) Currently available state
 static enum sanjuan_role role_cb_state;
 static int32_t state; // Callback set this to zero to refer not ready, non zero to ready with information inside
 static struct sanjuan_client_meta *thisMeta;
+static int32_t id_cb; // for callback to acknowledge role chooser id
 
 /*
  * Helper function declaration
  */
+static int32_t card_list_len(enum sanjuan_card *cards);
 static bool hand_contain(enum sanjuan_card * hand, enum sanjuan_card card);
 static bool table_contain(struct sanjuan_table_card * table, enum sanjuan_card card);
 static int32_t general_cmd_solver(char *); ///< solve general command, return 1 for success 0 for fail
@@ -160,15 +162,179 @@ static void crole_line_cb(char * cmd){
     }
 }
 
+static int32_t card_list_len(enum sanjuan_card *cards){
+    for(int32_t i = 0 ; i < SANJUAN_MAX_CARD ; ++i) {
+        if (cards[i] == CARD_INVALID) {
+            return i;
+        }
+    }
+}
+
+static void doProspector() {
+    if (id_cb == thisMeta->id) { // you are privileged
+        enum sanjuan_card drawn = sanjuan_game_draw();
+        printf("[Prospector] You had activate prospector privilege: card %s drawn to hand.\n", card_name[drawn]);
+        sanjuan_game_player_emplace_hand(thisMeta->id, drawn);
+    }
+
+    // TODO: implement Library here
+
+    // active gold mine
+    if (table_contain(sanjuan_game_get_table(thisMeta->id), CARD_GOLD_MINE)) {
+        printf("[Prospector] Gold mine activating!\n");
+        enum sanjuan_card drawn[4];
+        for (int32_t i = 0; i < 4; ++i)
+            drawn[i] = sanjuan_game_draw();
+        printf("[Prospector] You had drawn card: ");
+        for (int32_t i = 0; i < 4; ++i)
+            printf("%s, ", card_name[drawn[i]]);
+
+        // perform gold mine action
+        int32_t cnt[6] = {0};
+        for (int32_t i = 0; i < 4; ++i) {
+            ++cnt[card_cost[drawn[i]] - 1];
+        }
+        bool flag = true;
+        for (int32_t i = 0; i < 6; ++i) {
+            if (cnt[i] > 1) {
+                flag = false;
+            }
+        }
+        if (flag) { // TODO: Convention breaking! Figure out a way to avoid this!
+            printf("[Prospector] Gold mine activation success! Keep one of the drawn card.\n");
+            int32_t index = -1;
+            while (index >= 0) {
+                char *selection = readline("select one card>");
+                char *err;
+                int32_t tmp = (int32_t) strtol(selection, &err, 10);
+                if (*err) continue;
+                if (tmp < 0 || tmp > 4) continue;
+                index = tmp;
+                free(selection);
+            }
+            printf("[Prospector] Keep card %s. Other cards returns to discard stack.\n", card_name[drawn[index]]);
+            sanjuan_game_player_emplace_hand(thisMeta->id, drawn[index]);
+            for (int32_t i = 0; i < 4; ++i) {
+                if (i == index) continue;
+                sanjuan_game_discard(drawn[i]);
+            }
+        }
+    }
+}
+
+static void doBuilder(char *cmd){
+    size_t len = strlen(cmd);
+    char *copy = calloc(len+1, sizeof(char));
+    if(empty_string(cmd)) return;
+    strncpy(copy, cmd, len);
+    int32_t ret = general_cmd_solver(copy);
+
+    if(ret){
+        return;
+    }
+    strncpy(copy, cmd, len);
+    if(strcmp(copy, "help") == 0){
+        printf("Builder help:\n"
+               "    build <hand card index> <table index>: build the designated card at table index.\n");
+        printf("%s", general_cmd_help);
+        return;
+    }
+    else{
+        // discount!
+        int32_t discounts = 0;
+        if(id_cb == thisMeta->id) ++discounts;
+        // TODO: implement global discount card
+
+        char *saveptr;
+        char *it = strtok_r(copy, " ", &saveptr);
+        if(strcmp(it, "build") != 0){
+            printf("Command error. See help.\n");
+            return;
+        }
+        // build!
+        it = strtok_r(NULL, " ", &saveptr);
+        if(it == NULL){ // no argument is given after build command
+            printf("Command error. See help.\n");
+            return;
+        }
+        // parse
+        char *err;
+        int32_t hidx = (int32_t)strtol(it, &err, 10);
+        if(*err) {
+            printf("Index error.\n");
+        }
+        enum sanjuan_card *hands = sanjuan_game_get_hand(thisMeta->id);
+        if(hidx < 0 || hidx >= card_list_len(hands)){
+            printf("Index out of bound.\n");
+        }
+
+        // building position
+        it = strtok_r(NULL, " ", &saveptr);
+        if(it == NULL){ // no argument is given after build command
+            printf("Command error. See help.\n");
+            return;
+        }
+        int32_t tidx = (int32_t)strtol(it, &err, 10);
+        if(*err) {
+            printf("Index error.\n");
+        }
+        if(hidx < 0 || hidx >= 12){
+            printf("Index out of bound.\n");
+        }
+
+        if(strtok_r(NULL, " ", &saveptr) != NULL){ // no extra argument check
+            printf("Command error. See help.\n");
+            return;
+        }
+
+        // start building
+        struct sanjuan_table_card *table = sanjuan_game_get_table(thisMeta->id);
+        // TODO: calculate building cost (with discounts)
+        // TODO: player pay building cost
+        // disable override card when no crane
+        if(!table_contain(table, CARD_CRANE)){
+            if(table[tidx].class != CARD_INVALID){
+                printf("You can't build on another building.\n");
+                return;
+            }
+        }
+        sanjuan_game_player_place_table(thisMeta->id, hands[hidx], tidx);
+        sanjuan_game_discard(hands[hidx]);
+        state = 1;
+        return;
+    }
+}
+
+static void doCouncillor(char *cmd){
+
+}
+
+static void doProducer(char *cmd){
+
+}
+
+static void doTrader(char *cmd){
+
+}
+
 static void prole_line_cb(char * cmd){
     switch (role_cb_state) {
         case ROLE_BUILDER:
+            doBuilder(cmd);
             break;
         case ROLE_COUNCILLOR:
+            doCouncillor(cmd);
+            break;
+        case ROLE_PRODUCER:
+            doProducer(cmd);
+            break;
+        case ROLE_TRADER:
+            doTrader(cmd);
             break;
         default:
             break;
     }
+
     free(cmd);
 
     if(state) {
@@ -216,33 +382,17 @@ static void pre_perform_role(struct sanjuan_client_meta *meta, enum sanjuan_role
     thisMeta = meta;
     role_cb_state = role;
     state = 0;
+    id_cb = id;
 
     // Prospector will be resolve here
     if(role == ROLE_PROSPECTOR){
-        if(id == meta->id){ // you are privileged
-            enum sanjuan_card drawn = sanjuan_game_draw();
-            printf("[Prospector] You had activate prospector privilege: card %s drawn to hand.\n", card_name[drawn]);
-            sanjuan_game_player_emplace_hand(meta->id, drawn);
-        }
-
-        // active gold mine
-        if(table_contain(sanjuan_game_get_table(meta->id), CARD_GOLD_MINE)){
-            printf("[Prospector] Gold mine activating!\n");
-            enum sanjuan_card drawn[4];
-            for(int32_t i = 0 ; i < 4 ; ++i)
-                drawn[i] = sanjuan_game_draw();
-            printf("[Prospector] You had drawn card: ");
-            for(int32_t i = 0 ; i < 4 ; ++i)
-                printf("%s, ", card_name[drawn[i]]);
-
-            // TODO: perform gold mine action
-
-            // TODO: implement Library here
-        }
-
+        doProspector();
         state = 1;
     }
-    // TODO: install corresponding readline setup
+    else{
+        static const char *prompts[]={"Builder>", "Councillor>", "Producer>", "Prospector>", "Trader>"};
+        rl_callback_handler_install(prompts[role], prole_line_cb);
+    }
 }
 
 static int32_t perform_role(struct sanjuan_client_meta *meta){
